@@ -6,10 +6,9 @@ import (
 )
 
 var (
-	ErrDup              = errors.New("key exists")
-	ErrExpire           = errors.New("key has expired")
-	ErrNotFound         = errors.New("key does not exists")
-	ErrNegativeDuration = errors.New("duration cannot be negative")
+	ErrDup      = errors.New("key exists")
+	ErrExpire   = errors.New("key has expired")
+	ErrNotFound = errors.New("key does not exists")
 )
 
 type entry struct {
@@ -31,7 +30,7 @@ func New() *Cache {
 // Get gets a value from the cache
 func (c *Cache) Get(key interface{}) (interface{}, error) {
 	if ent, ok := c.c[key]; ok {
-		if ent.dl == -1 || ent.dl > time.Now().Unix() {
+		if ent.dl < 0 || ent.dl > time.Now().Unix() {
 			return ent.val, nil
 		}
 		delete(c.c, key)
@@ -45,9 +44,6 @@ func (c *Cache) Get(key interface{}) (interface{}, error) {
 
 // Add adds a new pair to the cache and an error will be returned if the key exists.
 func (c *Cache) Add(key interface{}, value interface{}, d time.Duration) error {
-	if d < 0 {
-		return ErrNegativeDuration
-	}
 	if _, ok := c.c[key]; ok {
 		return ErrDup
 	}
