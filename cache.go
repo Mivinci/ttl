@@ -44,11 +44,17 @@ func (c *Cache) Get(key interface{}) (interface{}, error) {
 
 // Add adds a new pair to the cache and an error will be returned if the key exists.
 func (c *Cache) Add(key interface{}, value interface{}, d time.Duration) error {
+	var dl int64
+	if d < 0 {
+		dl = -1
+	} else {
+		dl = time.Now().Add(d).Unix()
+	}
 	if _, ok := c.c[key]; ok {
 		return ErrDup
 	}
 	c.c[key] = &entry{
-		dl:  time.Now().Add(d).Unix(),
+		dl:  dl,
 		val: value,
 	}
 	return nil
@@ -66,11 +72,7 @@ func (c *Cache) Set(key interface{}, value interface{}, d time.Duration) error {
 		}
 		return nil
 	}
-	c.c[key] = &entry{
-		dl:  time.Now().Add(d).Unix(),
-		val: value,
-	}
-	return nil
+	return c.Add(key, value, d)
 }
 
 // Expire sets a new expiration interval for an existing key

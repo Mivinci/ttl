@@ -26,6 +26,10 @@ func TestNew(t *testing.T) {
 	v, e = c.Get("a")
 	assert.Nil(t, v)
 	assert.ErrorIs(t, ErrNotFound, e)
+	assert.Nil(t, c.Add("a", 1, -1))
+	v, e = c.Get("a")
+	assert.Nil(t, e)
+	assert.Equal(t, v, 1)
 }
 
 func TestSet(t *testing.T) {
